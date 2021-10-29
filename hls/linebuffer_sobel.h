@@ -5,4 +5,4 @@
 #include"rgb2gray.h"
 using namespace std;
 
-void linebuffer_sobel(hls::stream<pix_t> &FeatureIn,hls::stream<pix_t> &FeatureOut,int N,int P);
+void linebuffer_sobel(hls::stream<pix_t> &FeatureIn,hls::stream<pix_t> &FeatureOut,int H,int W,int P);

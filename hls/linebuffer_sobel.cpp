@@ -8,7 +8,7 @@ ap_uint<16> abs(ap_int<16> x){
 	}
 }
 
-void linebuffer_sobel(hls::stream<pix_t> &FeatureIn,hls::stream<pix_t> &FeatureOut,int N,int P){
+void linebuffer_sobel(hls::stream<pix_t> &FeatureIn,hls::stream<pix_t> &FeatureOut,int H,int W,int P){
 #pragma HLS DATAFLOW
 	//
 	const ap_int<8> Gx[K][K]={{-1,0,1},{-2,0,2},{-1,0,1}};
@@ -24,23 +24,25 @@ void linebuffer_sobel(hls::stream<pix_t> &FeatureIn,hls::stream<pix_t> &FeatureO
 	int LEN1,LEN2;
 	LEN1=0;
 	LEN2=0;
-	int start_index=2*N+4*P+K-1;
-	for(int i=0;i<(N+2*P)*(N+2*P);i++){
+	int start_index=2*W+4*P+K-1;
+	int padded_w=W+2*P;
+	int out_w=W+2*P-K+1;
+	for(int i=0;i<(H+2*P)*(W+2*P);i++){
 #pragma HLS PIPELINE II=1
 #pragma HLS LOOP_TRIPCOUNT min=900 max=900 avg=900
 		//����PADDING����
-		int row=i/(N+2*P);
-		int col=i%(N+2*P);
-		if(row>=P&&row<N+P&&col>=P&&col<N+P)
+		int row=i/(W+2*P);
+		int col=i%(W+2*P);
+		if(row>=P&&row<H+P&&col>=P&&col<W+P)
 			FeatureIn>>pixIn;
 		else
 			pixIn=0;
 		//LineBuffer
-		if(LEN1==(N+2*P)){
+		if(LEN1==(W+2*P)){
 			Line1>>Line1Rd;
 		    LEN1-=1;
 		}
-		if(LEN2==(N+2*P)){
+		if(LEN2==(W+2*P)){
 			Line2>>Line2Rd;
 		    LEN2-=1;
 		}
@@ -64,7 +66,7 @@ void linebuffer_sobel(hls::stream<pix_t> &FeatureIn,hls::stream<pix_t> &FeatureO
 		ap_uint<8> out;
 		sumx=0;
 		sumy=0;
-		if(i>=start_index&&(i-start_index)%N<(N-K+1)){
+		if(i>=start_index&&(i-start_index)%padded_w<out_w){
 			for(int i=0;i<K;i++)
 #pragma HLS UNROLL
 				for(int j=0;j<K;j++){
@@ -76,7 +78,7 @@ void linebuffer_sobel(hls::stream<pix_t> &FeatureIn,hls::stream<pix_t> &FeatureO
 			FeatureOut<<out;
 		}
 		//print
-		if(i>=start_index&&(i-start_index)%(N+2*P)<N){
+		if(i>=start_index&&(i-start_index)%padded_w<out_w){
 			cout<<"i="<<i<<endl;
 			for(int kx=0;kx<K;kx++){
 				for(int ky=0;ky<K;ky++)

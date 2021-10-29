@@ -13,14 +13,14 @@ void write_back(hls::stream<pix_t> &grad,ap_uint<8>* out,int h,int w,int p){
 
 void top_sobel(ap_uint<8>* in1,ap_uint<8>* in2,ap_uint<8>* in3,int h,int w,int p,int color,ap_uint<8>* out){
 #pragma HLS INTERFACE s_axilite port=return bundle=CTRL
-#pragma HLS INTERFACE m_axi depth=1296 port=out offset=slave bundle=OUT
+#pragma HLS INTERFACE m_axi depth=20736 port=out offset=slave bundle=OUT
 #pragma HLS INTERFACE s_axilite port=h bundle=CTRL
 #pragma HLS INTERFACE s_axilite port=color bundle=CTRL
 #pragma HLS INTERFACE s_axilite port=w bundle=CTRL
 #pragma HLS INTERFACE s_axilite port=p bundle=CTRL
-#pragma HLS INTERFACE m_axi depth=3888 port=in3 offset=slave bundle=IN3
-#pragma HLS INTERFACE m_axi depth=2592 port=in2 offset=slave bundle=IN2
-#pragma HLS INTERFACE m_axi depth=1296 port=in1 offset=slave bundle=IN1
+#pragma HLS INTERFACE m_axi depth=63000 port=in3 offset=slave bundle=IN3
+#pragma HLS INTERFACE m_axi depth=42000 port=in2 offset=slave bundle=IN2
+#pragma HLS INTERFACE m_axi depth=21000 port=in1 offset=slave bundle=IN1
 	hls::stream<pix_t> gray;
 #pragma HLS STREAM variable=gray depth=256 dim=1
 	hls::stream<pix_t> grad;
@@ -28,6 +28,6 @@ void top_sobel(ap_uint<8>* in1,ap_uint<8>* in2,ap_uint<8>* in3,int h,int w,int p
 	//
 #pragma HLS DATAFLOW
 	rgb2gray(in1,in2,in3,gray,h,w,color);
-	linebuffer_sobel(gray,grad,h,p);
+	linebuffer_sobel(gray,grad,h,w,p);
 	write_back(grad,out,h,w,p);
 }
